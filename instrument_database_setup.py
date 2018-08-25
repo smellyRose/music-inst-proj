@@ -14,6 +14,9 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+# All instrument and model data was 
+# randomly selected from musiciansfriend.com and guitarcenter.com
+
 
 # Create dummy user
 User1 = User(name="Bob Grass", email="bob_grass@rocketmail.com")
