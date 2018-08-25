@@ -1,5 +1,5 @@
-from flask import Flask, render_template, request, redirect, jsonify, url_for, flash
-
+from flask import Flask, render_template, request, redirect
+from flask import jsonify, url_for, flash
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, User, MusicalInstrument, Model
@@ -26,8 +26,8 @@ APPLICATION_NAME = "Musical Instrument Application"
 try:
     engine = create_engine('sqlite:///instrumentmodels.db')
     Base.metadata.bind = engine
-except:
-    print ("Unable to connect to the database")    
+except BaseException:
+    print ("Unable to connect to the database")
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
@@ -128,12 +128,10 @@ def gconnect():
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
 
-    user_id = getUserID(login_session['email'])    
+    user_id = getUserID(login_session['email'])
     if not user_id:
         user_id = createUser(login_session)
     login_session['user_id'] = user_id
-
-    print("user_id",user_id)
 
     output = ''
     output += '<h1>Welcome, '
@@ -157,11 +155,6 @@ def createUser(login_session):
     return user.id
 
 
-def getUserInfo(user_id): #not using this
-    user = session.query(User).filter_by(id=user_id).one()
-    return user
-
-
 def getUserID(email):
     try:
         user = session.query(User).filter_by(email=email).one()
@@ -173,7 +166,7 @@ def getUserID(email):
 # DISCONNECT - Revoke a current user's token and reset their login_session
 @app.route('/gdisconnect')
 def gdisconnect():
-        # Only disconnect a connected user.
+    # Only disconnect a connected user.
     access_token = login_session.get('access_token')
     if access_token is None:
         response = make_response(
@@ -320,7 +313,10 @@ def showModels(instrument_id):
         MusicalInstrument).filter_by(id=instrument_id).one()
     models = session.query(Model).filter_by(
         musicalInstrument_id=instrument_id).all()
-    loggedInStatus = login_session.get('user_id', None)
+    if 'username' not in login_session:
+        loggedInStatus = False
+    else:
+        loggedInStatus = True
     return render_template(
         'models.html',
         models=models,
@@ -348,7 +344,6 @@ def newModel(instrument_id):
             color=selectedColor[0],
             musicalInstrument_id=instrument_id,
             user_id=login_session['user_id'])
-            
         session.add(newModel)
         session.commit()
         flash('New Model %s Successfully Created' % (newModel.name))
@@ -371,7 +366,6 @@ def editModel(instrument_id, model_id):
     if 'username' not in login_session:
         return redirect('/login')
     editedModel = session.query(Model).filter_by(id=model_id).one()
-    print(login_session['user_id'],editedModel.user_id)
     if login_session['user_id'] != editedModel.user_id:
         return render_template('useridmismatch.html')
     instrument = session.query(MusicalInstrument).filter_by(

@@ -13,7 +13,7 @@ class User(Base):
     name = Column(String(250), nullable=False)
     email = Column(String(250), nullable=False)
     picture = Column(String(250))
-      
+
 
 class MusicalInstrument(Base):
     __tablename__ = 'musicalInstrument'
@@ -56,7 +56,7 @@ class Model(Base):
             'price': self.price,
             'color': self.color,
         }
-        
+
 
 engine = create_engine('sqlite:///instrumentmodels.db')
 
