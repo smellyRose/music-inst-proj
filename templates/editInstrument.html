@@ -1,0 +1,27 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "headerlogout.html" %}
+<div class="row small-padding-top small-padding-bottom">
+   <div class="col-md-1"></div>
+   <div class="col-md-10">
+      <h1>{{instrument.name}}</h1>
+   </div>
+</div>
+<div class="row">
+<div class="col-md-6 col-md-offset-1">
+   <form action="{{ url_for('editMusicalInstrument',instrument_id = instrument.id)}}" method = "post">
+      <div class="form-group">
+         <label for="name">Name:</label>
+         <input type ="text" class="form-control" name="name" value="{{instrument.name }}">
+         <div class="padding-bottom"></div>
+         <button type="submit" class="customButton" id="submit" type="submit"> 
+         <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>Save</button>
+         <div class="customButtonPadding"></div>
+   </form>
+   <form action="{{url_for('showModels', instrument_id = instrument.id)}}">
+   <button type="submit" class="customButton" id="submit" type="submit"> 
+   <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>Cancel</button>
+   </form>
+   </div>
+</div>
+{% endblock %}

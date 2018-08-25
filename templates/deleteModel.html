@@ -1,0 +1,20 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "headerlogout.html" %} 
+<div class="col-md-10 col-md-offset-1 padding-none">
+   <h1>Are You Sure You Want To Delete {{model.name}}?</h1>
+</div>
+<div class="row">
+   <div class="col-md-6 col-md-offset-1">
+      <form action="#" method = 'post'>
+         <button type="submit" class="customButton" id="submit" type="submit"> 
+         <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>Delete</button>
+         <div class="customButtonPadding"></div>
+      </form>
+      <form action="{{url_for('showModels', instrument_id = instrument_id)}}">
+         <button type="submit" class="customButton" id="submit" type="submit"> 
+         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>Cancel</button>
+      </form>
+   </div>
+</div>
+{% endblock %}

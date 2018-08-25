@@ -1,0 +1,18 @@
+cd /Users/JoeyBerger/Desktop/Udacity/FSND-Virtual-Machine/vagrant
+
+vagrant up
+
+vagrant ssh
+
+cd /vagrant
+
+cd Project2/
+
+python musical_instruments_project.py
+
+
+
+
+
+
+Use to format code  autopep8 --in-place --aggressive --aggressive musical_instruments_project.py

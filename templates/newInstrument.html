@@ -1,0 +1,30 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "headerlogout.html" %}
+
+   <div class="col-md-11 col-md-offset-1 padding-none">
+      <h1>New Instrument</h1>
+   </div>
+
+<div class="row">
+   <div class="col-md-6 col-md-offset-1 padding-top">
+      <form action="#" method = "post">
+         <div class="form-group">
+            <label for="name">Name:</label>
+            <input type ="text" class="form-control" maxlength="100" name="name">
+            <div class="padding-bottom"></div>
+            {% for color in availableColors%}
+            <input type="checkbox" name="selectedColor" value={{color}} {% if loop.index0 == 0%}checked{%endif%}> {{color}}<br>
+            {% endfor %}
+            <div class="padding-bottom"></div>
+            <button type="submit" class="customButton" id="submit" type="submit"> 
+            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>Save</button>
+         </div>
+      </form>
+      <form action="{{url_for('showInstruments')}}">
+         <button type="submit" class="customButton" id="submit" type="submit"> 
+         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>Cancel</button>
+      </form>
+   </div>
+</div>
+{% endblock %}

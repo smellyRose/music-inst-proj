@@ -1,0 +1,28 @@
+{% extends "main.html" %}
+{% block content %}
+<div class="row banner main">
+   <div class="col-md-1"></div>
+</div>
+<div class="row top-menu">
+   <div class="col-md-6">
+      <a href="{{url_for('showLogin')}}">
+      <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Log In
+      </a>
+   </div>
+</div>
+<div class="col-md-1"></div>
+<div class="col-md-11 padding-none">
+   <h1>Instrument Collection</h1>
+</div>
+{% for musicalInstrument in musicalInstruments %}
+<a href = "{{url_for('showModels', instrument_id = musicalInstrument.id)}}">
+   <div class="row">
+      <div class="col-md-1"></div>
+      <div class="col-md-10 instrument-list">
+         <h3>{{musicalInstrument.name}}</h3>
+      </div>
+      <div class="col-md-1"></div>
+   </div>
+</a>
+{% endfor %}
+{% endblock %}
