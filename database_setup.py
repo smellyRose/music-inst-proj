@@ -23,6 +23,7 @@ class MusicalInstrument(Base):
     availableColors = Column(String(250), nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User)
+    children = relationship('Model', cascade='all,delete', backref='parent')
 
     @property
     def serialize(self):

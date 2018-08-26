@@ -1,9 +1,16 @@
-from flask import Flask, render_template, request, redirect
-from flask import jsonify, url_for, flash
+from flask import (Flask,
+                   render_template,
+                   request,
+                   redirect,
+                   jsonify,
+                   url_for,
+                   flash)
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base, User, MusicalInstrument, Model
-
+from database_setup import (Base,
+                            User,
+                            MusicalInstrument,
+                            Model)
 from flask import session as login_session
 import random
 import string
@@ -44,6 +51,12 @@ allAvailableColors = [
     'Red Sparkle',
     'Brass',
     'Gold']
+
+error_message_select_color = """
+    Please Select At Least One Color"""
+
+error_message_incomlete_data = """
+    Please Enter All Necessary Fields"""
 
 
 # Create anti-forgery state token
@@ -157,7 +170,7 @@ def createUser(login_session):
 
 def getUserID(email):
     try:
-        user = session.query(User).filter_by(email=email).one()
+        user = session.query(User).filter_by(email=email).one_or_none()
         return user.id
     except BaseException:
         return None
@@ -210,7 +223,7 @@ def modelJSON(instrument_id, model_id):
         return redirect('/login')
     model = session.query(Model).filter_by(
         musicalInstrument_id=instrument_id).filter_by(
-        id=model_id).one()
+        id=model_id).one_or_none()
     return jsonify(Model=model.serialize)
 
 
@@ -252,6 +265,15 @@ def newInstrument():
             name=request.form['name'],
             user_id=login_session['user_id'],
             availableColors=formattedColors)
+        errorStr = ''
+        if request.form['name'] == '':
+            errorStr = error_message_incomlete_data
+        elif formattedColors == '':
+            errorStr = error_message_select_color
+        if errorStr is not '':
+            return render_template(
+                'incompletedata.html',
+                message=errorStr)
         session.add(newInstrument)
         flash('New Instrument %s Successfully Created' % newInstrument.name)
         session.commit()
@@ -268,7 +290,7 @@ def editMusicalInstrument(instrument_id):
     if 'username' not in login_session:
         return redirect('/login')
     editedInstrument = session.query(
-        MusicalInstrument).filter_by(id=instrument_id).one()
+        MusicalInstrument).filter_by(id=instrument_id).one_or_none()
     if login_session['user_id'] != editedInstrument.user_id:
         return render_template('useridmismatch.html')
     if request.method == 'POST':
@@ -276,6 +298,10 @@ def editMusicalInstrument(instrument_id):
             editedInstrument.name = request.form['name']
             flash('Instrument Successfully Edited %s' % editedInstrument.name)
             return redirect(url_for('showInstruments'))
+        else:
+            return render_template(
+                'incompletedata.html',
+                message=error_message_incomlete_data)
     else:
         return render_template(
             'editInstrument.html',
@@ -288,7 +314,7 @@ def deleteInstrument(instrument_id):
     if 'username' not in login_session:
         return redirect('/login')
     instrumentToDelete = session.query(
-        MusicalInstrument).filter_by(id=instrument_id).one()
+        MusicalInstrument).filter_by(id=instrument_id).one_or_none()
     if login_session['user_id'] != instrumentToDelete.user_id:
         return render_template('useridmismatch.html')
     if request.method == 'POST':
@@ -310,7 +336,7 @@ def deleteInstrument(instrument_id):
 @app.route('/instrument/<int:instrument_id>/model/')
 def showModels(instrument_id):
     instrument = session.query(
-        MusicalInstrument).filter_by(id=instrument_id).one()
+        MusicalInstrument).filter_by(id=instrument_id).one_or_none()
     models = session.query(Model).filter_by(
         musicalInstrument_id=instrument_id).all()
     if 'username' not in login_session:
@@ -334,9 +360,15 @@ def newModel(instrument_id):
     if 'username' not in login_session:
         return redirect('/login')
     instrument = session.query(
-        MusicalInstrument).filter_by(id=instrument_id).one()
+        MusicalInstrument).filter_by(id=instrument_id).one_or_none()
     if request.method == 'POST':
         selectedColor = request.form.getlist('selectedColor')
+        if (request.form['name'] == '' or
+                request.form['description'] == ''
+                or request.form['price'] == ''):
+            return render_template(
+                'incompletedata.html',
+                message=error_message_incomlete_data)
         newModel = Model(
             name=request.form['name'],
             description=request.form['description'],
@@ -365,21 +397,23 @@ def newModel(instrument_id):
 def editModel(instrument_id, model_id):
     if 'username' not in login_session:
         return redirect('/login')
-    editedModel = session.query(Model).filter_by(id=model_id).one()
+    editedModel = session.query(Model).filter_by(id=model_id).one_or_none()
     if login_session['user_id'] != editedModel.user_id:
         return render_template('useridmismatch.html')
     instrument = session.query(MusicalInstrument).filter_by(
-        id=instrument_id).one()
+        id=instrument_id).one_or_none()
     availableColors = instrument.availableColors.split(',')
     if request.method == 'POST':
-        if request.form['name']:
-            editedModel.name = request.form['name']
-        if request.form['description']:
-            editedModel.description = request.form['description']
-        if request.form['price']:
-            editedModel.price = request.form['price']
-        if request.form['color']:
-            editedModel.color = request.form['color']
+        if (request.form['name'] == ''
+                or request.form['description'] == ''
+                or request.form['price'] == ''):
+            return render_template(
+                'incompletedata.html',
+                message=error_message_incomlete_data)
+        editedModel.name = request.form['name']
+        editedModel.description = request.form['description']
+        editedModel.price = request.form['price']
+        editedModel.color = request.form['color']
         session.add(editedModel)
         session.commit()
         flash('Model Successfully Edited')
@@ -403,7 +437,7 @@ def deleteModel(instrument_id, model_id):
     if 'username' not in login_session:
         return redirect('/login')
     instrument = session.query(MusicalInstrument).filter_by(
-        id=instrument_id).one()
+        id=instrument_id).one_or_none()
     modelToDelete = session.query(Model).filter_by(id=model_id).one()
     if login_session['user_id'] != modelToDelete.user_id:
         return render_template('useridmismatch.html')
